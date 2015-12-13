@@ -1,4 +1,10 @@
+
 package soa.web;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.camel.ProducerTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +28,14 @@ public class SearchController {
 
     @RequestMapping(value="/search")
     @ResponseBody
-    public Object search(@RequestParam("q") String q) {
-        return producerTemplate.requestBodyAndHeader("direct:search", "", "CamelTwitterKeywords", q);
+    public Object search(@RequestParam("q") String q) {    	
+    	Pattern exprReg = Pattern.compile("(.*)max:([0-9]*)");
+    	Matcher m = exprReg.matcher(q);
+    	m.matches(); 
+    	
+    	Map<String, Object> headers = new HashMap<String, Object>();
+    	headers.put("CamelTwitterKeywords", m.group(1));
+    	headers.put("CamelTwitterCount", m.group(2));
+    	return producerTemplate.requestBodyAndHeaders("direct:search", "", headers);
     }
 }
